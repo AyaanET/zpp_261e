@@ -1,0 +1,23 @@
+{
+  "generationParameters": {
+    "generationDate": "Sun Jun 21 2026 06:13:20 GMT+0000 (Coordinated Universal Time)",
+    "generatorPlatform": "SAP Business Application Studio",
+    "serviceType": "OData URL",
+    "metadataFilename": "",
+    "serviceUrl": "https://my433482-api.s4hana.cloud.sap/sap/opu/odata4/sap/zsb_261e/srvd_a2x/sap/zsd_261e_hd/0001/",
+    "appName": "zpp_261e",
+    "appTitle": "production order confirmation",
+    "appDescription": "An SAP Fiori application.",
+    "appNamespace": "",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.142.12",
+    "enableEslint": true,
+    "enableTypeScript": false,
+    "showMockDataInfo": true,
+    "generatorVersion": "1.27.0",
+    "template": "Basic V4",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [],
+    "launchText": "To launch the generated application, run the following from the generated application root folder:\n\n```\n    npm start\n```"
+  }
+}
