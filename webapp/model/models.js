@@ -27,13 +27,13 @@ function (JSONModel, Device) {
                 selection: {
                     postingDate: new Date(), // Automatically sets today
                     prodOrder: "",
-                    plant: "1200",
+                    plant: "",
                     salesOrder: "",
                     salesOrderItem: "",
-                    Sloc: "1201", 
+                    Sloc: "1210", 
                     shift : "1",
                     prodOrdQty: "",
-                    operation : "",
+                    operation : "0010",
                     unit : "",
                     remark: "",
                     yieldQty: ""

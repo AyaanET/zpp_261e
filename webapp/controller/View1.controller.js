@@ -75,16 +75,34 @@ sap.ui.define([
                 MessageBox.error("Error fetching header details.");
             });
         },
-          // ==========================================
-        // BACKGROUND CACHE LOGIC
-        // ==========================================
+
+
+        onSlocChange: function () {
+            var oLocalModel = this.getView().getModel("local");
+            var sSalesOrder = oLocalModel.getProperty("/selection/salesOrder");
+            var sSalesOrderItem = oLocalModel.getProperty("/selection/salesOrderItem");
+
+            // Only try to re-fetch if the Sales Order details are already known
+            if (sSalesOrder && sSalesOrderItem) {
+                this._fetchBatchesInBackground(sSalesOrder, sSalesOrderItem);
+            }
+        },
+         
        // ==========================================
         // BACKGROUND CACHE LOGIC
         // ==========================================
         _fetchBatchesInBackground: function (sSalesOrder, sSalesOrderItem) {
             var oView = this.getView();
 
-            console.log("Attempting fetch... Sales Order:", sSalesOrder, " | Item:", sSalesOrderItem);
+            var sSloc = oLocalModel.getProperty("/selection/Sloc");
+
+            // 2. Validation: Give error message if Storage Location is empty
+            if (!sSloc || sSloc.trim() === "") {
+                sap.m.MessageBox.error("Please enter a Storage Location to load the batches.");
+                return; 
+            }
+
+            console.log("Attempting fetch... Sales Order:", sSalesOrder, " | Item:", sSalesOrderItem , " | Storage Location:", sSloc);
 
             if (!sSalesOrder || !sSalesOrderItem) {
                 return; 
@@ -95,7 +113,8 @@ sap.ui.define([
             // FIX: Match the CDS View field names exactly (SDDocument instead of SalesOrder)
             var aFilters = [
                 new Filter("SDDocument", FilterOperator.EQ, sSalesOrder),
-                new Filter("SDDocumentItem", FilterOperator.EQ, sSalesOrderItem)
+                new Filter("SDDocumentItem", FilterOperator.EQ, sSalesOrderItem),
+                new Filter("StorageLocation", FilterOperator.EQ, sSloc) // Filter by Storage Location as well
             ];
 
             // FIX: Update the $select string to match CDS View and remove extra spaces
@@ -343,13 +362,15 @@ sap.ui.define([
                             // Automatically clear the screen after success
                             oLocalModel.setProperty("/scannedBatches", []);
                             oLocalModel.setProperty("/selection/prodOrder", "");
-                            oLocalModel.setProperty("/selection/operation", "");
+                            oLocalModel.setProperty("/selection/plant", "");
+                            oLocalModel.setProperty("/selection/Sloc", "1210");
+                            oLocalModel.setProperty("/selection/operation", "0010");
                             oLocalModel.setProperty("/selection/salesOrder", "");
                             oLocalModel.setProperty("/selection/salesOrderItem", "");
                             oLocalModel.setProperty("/selection/remark", "");
                             oLocalModel.setProperty("/selection/shift", "1");
-                            oLocalModel.setProperty("/selection/yieldQty", "0.00");
-                            
+                            oLocalModel.setProperty("/selection/yieldQty", "");
+                            oLocalModel.setProperty("/selection/unit", "");
                             // Put cursor back at the production order input
                             var oProdOrderInput = oView.byId("inputProdOrder");
                             if (oProdOrderInput) {
@@ -385,7 +406,7 @@ sap.ui.define([
             // 2. Reset the Selection Screen fields to empty or defaults
             oLocalModel.setProperty("/selection/postingDate", new Date()); // Reset to today
             oLocalModel.setProperty("/selection/prodOrder", "");
-            oLocalModel.setProperty("/selection/operation", "");
+            oLocalModel.setProperty("/selection/operation", "0010");
             oLocalModel.setProperty("/selection/salesOrder", "");
             oLocalModel.setProperty("/selection/salesOrderItem", "");
             oLocalModel.setProperty("/selection/prodOrdQty", "");
@@ -394,7 +415,7 @@ sap.ui.define([
             
             // Retain defaults for standard fields to save user time (optional)
             oLocalModel.setProperty("/selection/plant", "");
-            oLocalModel.setProperty("/selection/Sloc", "");
+            oLocalModel.setProperty("/selection/Sloc", "1210");
             oLocalModel.setProperty("/selection/shift", "1");
 
             // 3. Recalculate Yield (this will safely reset it to "0.00" since the array is now empty)

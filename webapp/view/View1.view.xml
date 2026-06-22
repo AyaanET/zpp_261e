@@ -77,7 +77,7 @@
                             </Input>
 
                             <Label id="_IDGenLabel3" text="Storage Location" required="true"/>
-                            <Input id="inputFromSloc" value="{local>/selection/fromSloc}" change=".onSelectionChange" placeholder="Select Storage Location" />
+                            <Input id="inputFromSloc" value="{local>/selection/Sloc}" change=".onSlocChange" placeholder="Select Storage Location" />
 
 
                             <core:Title id="_IDGenTitleCol3" text="Additional Info" />
