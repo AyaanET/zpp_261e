@@ -1,6 +1,223 @@
 <mvc:View controllerName="zpp261e.controller.View1"
     xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
     xmlns="sap.m">
     <Page id="page" title="{i18n>title}">
+        <content>
+            
+            <Panel id="selectionPanel" expandable="true" expanded="true" headerText="Selection Screen" width="auto" class="sapUiResponsiveMargin">
+                <content>
+                    
+                    <f:SimpleForm id="selectionForm"
+                        editable="true"
+                        layout="ColumnLayout"
+                        columnsM="3" columnsL="3" columnsXL="3">
+                        <f:content>
+                            
+                            <core:Title id="_IDGenTitleCol1" text="Production Details" />
+
+                            <Label id="_IDGenLabelPostingDate" text="Posting Date" required="true" />
+                            <DatePicker id="_IDGenDatePicker" value="{
+                                path: 'local>/selection/postingDate', 
+                                type: 'sap.ui.model.type.Date', 
+                                formatOptions: {pattern: 'MMM dd, yyyy'}
+                            }" />
+
+                            <Label id="_IDGenLabelProdOrder" text="Production Order" required="true"  />
+                            <Input id="inputProdOrder" value="{local>/selection/prodOrder}" placeholder="Enter Production Order" change=".onProdOrderChange" />
+
+                            <Label id="_IDGenLabelOperation" text="Operation" required="true" />
+                            <Input id="inputOperation" value="{local>/selection/operation}" placeholder="Enter Operation" />
+
+                            <Label id="_IDGenLabelProdQty" text="Production Order Qty" />
+                            <Input id="inputProdOrderQty" value="{local>/selection/prodOrdQty}" placeholder="Enter Quantity" />
+                            
+
+                            <core:Title id="_IDGenTitleCol2" text="Sales &amp; Storage Details" />
+
+                            <Label id="_IDGenLabel1" text="Sales Order" required="true"/>
+                            <Input id="inputSalesOrder"
+                                   value="{local>/selection/salesOrder}" showValueHelp="true"
+                                   showSuggestion="true"
+                                   suggest=".onSalesOrderSuggest"
+                                   suggestionItems="{ path: '/ZI_PLANTSALES_VH', templateShareable: false }"
+                                   valueHelpRequest=".onSalesOrderValueHelp"
+                                   placeholder="Select Sales Order">
+                                <suggestionItems>
+                                    <core:ListItem id="_IDGenListItem2" text="{SalesOrder}" key="{SalesOrder}" />
+                                </suggestionItems>
+                            </Input>
+
+                            <Label id="_IDGenLabel2" text="Sales Order Item" required="true"/>
+                            <Input id="inputSalesOrderItem"
+                                   value="{local>/selection/salesOrderItem}" showValueHelp="true"
+                                   showSuggestion="true"
+                                   suggest=".onSalesOrderItemSuggest"
+                                   suggestionItems="{ path: '/ZI_SALESITEM_VH', templateShareable: false }"
+                                   valueHelpRequest=".onSalesOrderItemValueHelp"
+                                   placeholder="Select Item">
+                                <suggestionItems>
+                                    <core:ListItem id="_IDGenListItem3" text="{SalesOrderItem}" key="{SalesOrderItem}" />
+                                </suggestionItems>
+                            </Input>
+
+                            <Label id="_IDGenLabel" text="Plant" required="true"/>
+                            <Input id="inputPlant"
+                                   value="{local>/selection/plant}"    showValueHelp="true"
+                                   showSuggestion="true"
+                                   suggestionItems="{ path: '/ZI_PLANTVH', templateShareable: false }"
+                                   valueHelpRequest=".onPlantValueHelp"
+                                   suggestionItemSelected=".onSelectionChange"  
+                                   change=".onSelectionChange"
+                                   placeholder="Select Plant">
+                                <suggestionItems>
+                                    <core:ListItem id="_IDGenListItem1" text="{Plant}" additionalText="{PlantName}" key="{Plant}" />
+                                </suggestionItems>
+                            </Input>
+
+                            <Label id="_IDGenLabel3" text="Storage Location" required="true"/>
+                            <Input id="inputFromSloc" value="{local>/selection/fromSloc}" change=".onSelectionChange" placeholder="Select Storage Location" />
+
+
+                            <core:Title id="_IDGenTitleCol3" text="Additional Info" />
+
+                            <Label id="_IDGenLabelShift" text="Shift" required="true"/>
+                            <Select id="selectShift" selectedKey="{local>/selection/shift}">
+                                <core:Item id="shiftItem1" key="1" text="1" />
+                                <core:Item id="shiftItem2" key="2" text="2" />
+                            </Select>
+
+                            <Label id="_IDGenLabel5" text="Remark" />
+                            <Input id="inputRemark" 
+                                   value="{local>/selection/remark}" placeholder="Enter remark..." />
+
+                            <Label id="_IDGenLabel4" text="UOM"/>
+                            <Input id="inputUOM" 
+                                   value="{local>/selection/unit}" placeholder="Enter UOM..." />
+                            
+                        </f:content>
+                    </f:SimpleForm>
+                    
+                </content>
+            </Panel>
+
+            <Panel id="_IDGenPanel"
+                headerText="Scan Batches"
+                expandable="true"
+                expanded="true"
+                class="sapUiResponsiveMargin"
+                width="auto" >
+                <HBox id="_IDGenHBox"
+                    alignItems="Center"
+                    wrap="Wrap"
+                    class="sapUiSmallMarginTop" >
+                    
+                    <Label id="_IDGenLabel6"
+                        text="Scan Batch:"
+                        class="sapUiSmallMarginEnd"
+                        design="Bold"
+                        labelFor="batchInput" />
+
+                    <Input
+                        id="batchInput"
+                        placeholder="Enter Batch Number..."
+                        width="30rem"
+                        submit=".onAddBatch"
+                        class="sapUiSmallMarginEnd" />
+
+                    <Button id="_IDGenButton"
+                        text="Add"
+                        press=".onAddBatch"
+                        type="Emphasized"
+                        icon="sap-icon://add" />
+                </HBox>
+            </Panel>
+
+            <Panel id="_IDGenPanel1"
+                headerText="Batch Details"
+                expandable="true"
+                expanded="true"
+                class="sapUiResponsiveMargin"
+                width="auto" >
+                
+                <Table
+                    id="batchesTable"
+                    items="{local>/scannedBatches}"
+                    noDataText="No batches scanned yet."
+                    sticky="ColumnHeaders,HeaderToolbar"
+                    growing="true"
+                    growingThreshold="20"
+                    mode="MultiSelect" >
+                    
+                    <headerToolbar>
+                        <OverflowToolbar id="_IDGenOverflowToolbar">
+                            <Title id="_IDGenTitle" text="Scanned Items" level="H3" />
+                            <ToolbarSpacer id="_IDGenToolbarSpacer" />
+                            <Button id="_IDGenButton1"
+                                text="Delete"
+                                icon="sap-icon://delete"
+                                type="Reject"
+                                press=".onDeleteBatch" />
+                        </OverflowToolbar>
+                    </headerToolbar>
+
+                    <columns>
+                        <Column id="_IDGenColumn" width="10rem">
+                            <Text id="_IDGenText8" text="Batch" />
+                        </Column>
+
+                        <Column id="_IDGenColumn5" width="12rem">
+                            <Text id="_IDGenText9" text="Material" />
+                        </Column>
+
+                        <Column id="_IDGenColumn6" width="18rem">
+                            <Text id="_IDGenText10" text="Description" />
+                        </Column>
+
+                        <Column id="_IDGenColumn7" width="8rem" hAlign="End">
+                            <Text id="_IDGenText11" text="Qty" />
+                            <footer>
+                                <ObjectNumber id="_IDGenObjectNumber" number="{local>/selection/yieldQty}" state="Success" />
+                            </footer>
+                        </Column>
+
+                        <Column id="_IDGenColumn8" width="6rem">
+                            <Text id="_IDGenText12" text="UoM" />
+                        </Column>
+                    </columns>
+
+                   <items>
+                        <ColumnListItem id="_IDGenColumnListItem3">
+                            <cells>
+                                <Text id="_IDGenText13" text="{local>batch}" />
+                                <Text id="_IDGenText14" text="{local>material}" />
+                                <Text id="_IDGenText15" text="{local>description}" />
+                                <Text id="_IDGenText16" text="{local>qty}" />
+                                <Text id="_IDGenText17" text="{local>uom}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+            </Panel>
+            
+        </content>
+
+        <footer>
+            <OverflowToolbar id="_IDGenOverflowToolbarFooter">
+                <ToolbarSpacer id="_IDGenToolbarSpacerFooter" />
+                
+                <Button id="btnNew" 
+                        text="New" 
+                        icon="sap-icon://add-document" 
+                        press=".onNew" />
+                        
+                <Button id="btnSubmit" 
+                        text="Submit" 
+                        type="Accept" 
+                        icon="sap-icon://accept" 
+                        press=".onSubmit" />
+            </OverflowToolbar>
+        </footer>
     </Page>
 </mvc:View>
