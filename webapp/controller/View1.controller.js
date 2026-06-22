@@ -94,6 +94,7 @@ sap.ui.define([
         _fetchBatchesInBackground: function (sSalesOrder, sSalesOrderItem) {
             var oView = this.getView();
 
+            var oLocalModel = oView.getModel("local"); 
             var sSloc = oLocalModel.getProperty("/selection/Sloc");
 
             // 2. Validation: Give error message if Storage Location is empty
