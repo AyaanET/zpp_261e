@@ -109,37 +109,54 @@ sap.ui.define([
             oEvent.getSource().getBinding("suggestionItems").filter(aFilters);
         },
 
-        onFromSlocValueHelp: function (oEvent) {
+      onFromSlocValueHelp: function (oEvent) {
             var oView = this.getView();
-            var sPlant = oView.byId("inputPlant").getValue();
+            
+            // FIX: Always read the dynamic value from the model, not the UI element
+            var sPlant = oView.getModel("local").getProperty("/selection/plant");
 
             if (!sPlant) {
                 sap.m.MessageToast.show("Please select a Plant first");
                 return;
             }
 
+            var oFilter = new Filter("Plant", FilterOperator.EQ, sPlant);
+
             if (!this._oFromSlocDialog) {
                 sap.ui.core.Fragment.load({
                     id: oView.getId(),
-                    name: "zpp261e.view.FromSlocVH", // Ensure this fragment is created
+                    name: "zpp261e.view.FromSlocVH", 
                     controller: this
                 }).then(function (oDialog) {
                     this._oFromSlocDialog = oDialog;
                     oView.addDependent(this._oFromSlocDialog);
-                    var oFilter = new Filter("Plant", FilterOperator.EQ, sPlant);
-                    this._oFromSlocDialog.getBinding("items").filter([oFilter]);
+                    
+                    // FIX: Open the dialog first so OData V4 initializes the list binding
                     this._oFromSlocDialog.open();
+                    
+                    // Now safely apply the filter
+                    var oBinding = this._oFromSlocDialog.getBinding("items");
+                    if (oBinding) {
+                        oBinding.filter([oFilter]);
+                    }
                 }.bind(this));
             } else {
-                var oFilter = new Filter("Plant", FilterOperator.EQ, sPlant);
-                this._oFromSlocDialog.getBinding("items").filter([oFilter]);
+                
+                // On subsequent opens, safely filter before opening
+                var oBinding = this._oFromSlocDialog.getBinding("items");
+                if (oBinding) {
+                    oBinding.filter([oFilter]);
+                }
                 this._oFromSlocDialog.open();
             }
         },
 
         onFromSlocVHSearch: function (oEvent) {
             var sValue = oEvent.getParameter("value");
-            var sPlant = this.getView().byId("inputPlant").getValue();
+            
+            // FIX: Also use the model here to prevent search filter crashes
+            var sPlant = this.getView().getModel("local").getProperty("/selection/plant");
+            
             var aFilters = [new Filter("Plant", FilterOperator.EQ, sPlant)];
 
             if (sValue) {
