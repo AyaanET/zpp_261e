@@ -87,6 +87,83 @@ sap.ui.define([
                 this._fetchBatchesInBackground(sSalesOrder, sSalesOrderItem);
             }
         },
+
+                       // ==========================================
+        // FROM STORAGE LOCATION LOGIC
+        // ==========================================
+        onFromSlocSuggest: function (oEvent) {
+            var sTerm = oEvent.getParameter("suggestValue");
+            var sPlant = this.getView().byId("inputPlant").getValue();
+            var aFilters = [];
+
+            if (!sPlant) {
+                sap.m.MessageToast.show("Please select a Plant first");
+                oEvent.getSource().getBinding("suggestionItems").filter([]);
+                return;
+            }
+
+            aFilters.push(new Filter("Plant", FilterOperator.EQ, sPlant));
+            if (sTerm) {
+                aFilters.push(new Filter("StorageLocation", FilterOperator.StartsWith, sTerm));
+            }
+            oEvent.getSource().getBinding("suggestionItems").filter(aFilters);
+        },
+
+        onFromSlocValueHelp: function (oEvent) {
+            var oView = this.getView();
+            var sPlant = oView.byId("inputPlant").getValue();
+
+            if (!sPlant) {
+                sap.m.MessageToast.show("Please select a Plant first");
+                return;
+            }
+
+            if (!this._oFromSlocDialog) {
+                sap.ui.core.Fragment.load({
+                    id: oView.getId(),
+                    name: "zpp261e.view.FromSlocVH", // Ensure this fragment is created
+                    controller: this
+                }).then(function (oDialog) {
+                    this._oFromSlocDialog = oDialog;
+                    oView.addDependent(this._oFromSlocDialog);
+                    var oFilter = new Filter("Plant", FilterOperator.EQ, sPlant);
+                    this._oFromSlocDialog.getBinding("items").filter([oFilter]);
+                    this._oFromSlocDialog.open();
+                }.bind(this));
+            } else {
+                var oFilter = new Filter("Plant", FilterOperator.EQ, sPlant);
+                this._oFromSlocDialog.getBinding("items").filter([oFilter]);
+                this._oFromSlocDialog.open();
+            }
+        },
+
+        onFromSlocVHSearch: function (oEvent) {
+            var sValue = oEvent.getParameter("value");
+            var sPlant = this.getView().byId("inputPlant").getValue();
+            var aFilters = [new Filter("Plant", FilterOperator.EQ, sPlant)];
+
+            if (sValue) {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("StorageLocation", FilterOperator.Contains, sValue),
+                        new Filter("StorageLocationName", FilterOperator.Contains, sValue)
+                    ],
+                    and: false
+                }));
+            }
+            oEvent.getSource().getBinding("items").filter(aFilters);
+        },
+
+        onFromSlocVHConfirm: function (oEvent) {
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+            if (oSelectedItem) {
+                var sSloc = oSelectedItem.getCells()[1].getText();
+                this.getView().byId("inputFromSloc").setValue(sSloc);
+                
+                // Trigger the background fetch since From Sloc changed
+                this.onSlocChange(); 
+            }
+        },
          
        // ==========================================
         // BACKGROUND CACHE LOGIC

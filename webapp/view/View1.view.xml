@@ -38,48 +38,49 @@
 
                             <Label id="_IDGenLabel1" text="Sales Order" required="true"/>
                             <Input id="inputSalesOrder"
-                                   value="{local>/selection/salesOrder}" showValueHelp="true"
-                                   showSuggestion="true"
-                                   suggest=".onSalesOrderSuggest"
-                                   suggestionItems="{ path: '/ZI_PLANTSALES_VH', templateShareable: false }"
-                                   valueHelpRequest=".onSalesOrderValueHelp"
+                                   value="{local>/selection/salesOrder}" 
                                    placeholder="Select Sales Order">
-                                <suggestionItems>
+                                <!-- <suggestionItems>
                                     <core:ListItem id="_IDGenListItem2" text="{SalesOrder}" key="{SalesOrder}" />
-                                </suggestionItems>
+                                </suggestionItems> -->
                             </Input>
 
                             <Label id="_IDGenLabel2" text="Sales Order Item" required="true"/>
                             <Input id="inputSalesOrderItem"
-                                   value="{local>/selection/salesOrderItem}" showValueHelp="true"
-                                   showSuggestion="true"
-                                   suggest=".onSalesOrderItemSuggest"
-                                   suggestionItems="{ path: '/ZI_SALESITEM_VH', templateShareable: false }"
-                                   valueHelpRequest=".onSalesOrderItemValueHelp"
+                                   value="{local>/selection/salesOrderItem}" 
                                    placeholder="Select Item">
-                                <suggestionItems>
+                                <!-- <suggestionItems>
                                     <core:ListItem id="_IDGenListItem3" text="{SalesOrderItem}" key="{SalesOrderItem}" />
-                                </suggestionItems>
+                                </suggestionItems> -->
                             </Input>
 
                             <Label id="_IDGenLabel" text="Plant" required="true"/>
                             <Input id="inputPlant"
-                                   value="{local>/selection/plant}"    showValueHelp="true"
-                                   showSuggestion="true"
-                                   suggestionItems="{ path: '/ZI_PLANTVH', templateShareable: false }"
-                                   valueHelpRequest=".onPlantValueHelp"
-                                   suggestionItemSelected=".onSelectionChange"  
+                                   value="{local>/selection/plant}"     
                                    change=".onSelectionChange"
                                    placeholder="Select Plant">
-                                <suggestionItems>
+                                <!-- <suggestionItems>
                                     <core:ListItem id="_IDGenListItem1" text="{Plant}" additionalText="{PlantName}" key="{Plant}" />
-                                </suggestionItems>
+                                </suggestionItems> -->
                             </Input>
 
-                            <Label id="_IDGenLabel3" text="Storage Location" required="true"/>
-                            <Input id="inputFromSloc" value="{local>/selection/Sloc}" change=".onSlocChange" placeholder="Select Storage Location" />
+                            <!-- <Label id="_IDGenLabel3" text="Storage Location" required="true"/>
+                            <Input id="inputFromSloc" value="{local>/selection/Sloc}" change=".onSlocChange" placeholder="Select Storage Location" /> -->
 
-
+                             <Label id="_IDGenLabel3" text="From Storage Location" required="true"/>
+                            <Input id="inputFromSloc" 
+                                value="{local>/selection/Sloc}"
+                                change=".onSlocChange"
+                                showValueHelp="true"
+                                showSuggestion="true"
+                                suggest=".onFromSlocSuggest"
+                                suggestionItems="{ path: '/ZI_STORAGELOCATION_VH', templateShareable: false }"
+                                valueHelpRequest=".onFromSlocValueHelp"
+                                placeholder="Select From Sloc">
+                                <suggestionItems>
+                                    <core:ListItem id="_IDGenListItemFromSloc" text="{StorageLocation}" additionalText="{StorageLocationName}" key="{StorageLocation}" />
+                                </suggestionItems>
+                            </Input>
                             <core:Title id="_IDGenTitleCol3" text="Additional Info" />
 
                             <Label id="_IDGenLabelShift" text="Shift" required="true"/>

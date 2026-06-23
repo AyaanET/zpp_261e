@@ -1,0 +1,32 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <TableSelectDialog id="fromSlocTableSelectDialog"
+        title="Select From Storage Location"
+        items="{/ZI_STORAGELOCATION_VH}"
+        confirm=".onFromSlocVHConfirm" 
+        contentWidth="600px"         
+        contentHeight="400px"
+        search=".onFromSlocVHSearch"
+        rememberSelections="true">
+        
+        <ColumnListItem id="fromSlocColumnListItem">
+            <cells>
+                <Text id="fromSlocTextPlant" text="{Plant}" />
+                <Text id="fromSlocTextSloc" text="{StorageLocation}" />
+                <Text id="fromSlocTextName" text="{StorageLocationName}" />
+            </cells>
+        </ColumnListItem>
+        
+        <columns>
+            <Column id="fromSlocColPlant" width="6rem">
+                <header><Text id="fromSlocColTextPlant" text="Plant" /></header>
+            </Column>
+            <Column id="fromSlocColSloc" width="8rem">
+                <header><Text id="fromSlocColTextSloc" text="Storage Location" /></header>
+            </Column>
+            <Column id="fromSlocColName">
+                <header><Text id="fromSlocColTextName" text="Description" /></header>
+            </Column>
+        </columns>
+        
+    </TableSelectDialog>
+</core:FragmentDefinition>
