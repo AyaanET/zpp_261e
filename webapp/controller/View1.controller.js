@@ -266,6 +266,9 @@ sap.ui.define([
         // ==========================================
         // SUBMIT TO BACKEND (DEEP INSERT)
         // ==========================================
+        // ==========================================
+        // SUBMIT TO BACKEND (DEEP INSERT)
+        // ==========================================
         onSubmit: function () {
             var oView = this.getView();
             var oLocalModel = oView.getModel("local");
@@ -288,12 +291,24 @@ sap.ui.define([
                 return;
             }
 
+            // Parse quantities to floats and handle potential empty values
+            var fProdOrdQty = String(oSelection.prodOrdQty) || 0;
+            var fYieldQty = String(oSelection.yieldQty) || 0;
+
+            // Compare rounded to 3 decimal places to avoid JS floating-point precision issues
+            if (fYieldQty.toFixed(3) > fProdOrdQty.toFixed(3)) {
+                sap.m.MessageBox.error(
+                    `Yield Quantity cannot exceed the Production Order Quantity (${fProdOrdQty}).`
+                );
+                return;
+            }
+
             // ==========================================
             // 3. FORMATTING THE PAYLOAD
             // ==========================================
             
             // Format Posting Date to "YYYY-MM-DD"
-         var oDateFormat = sap.ui.core.format.DateFormat.getDateInstance({ pattern: "yyyy-MM-dd" });
+            var oDateFormat = sap.ui.core.format.DateFormat.getDateInstance({ pattern: "yyyy-MM-dd" });
             var sFormattedDate = oDateFormat.format(oSelection.postingDate);
 
             // Apply SAP Standard Alpha Conversion (Leading Zeros)
@@ -351,8 +366,13 @@ sap.ui.define([
                 var sConfGroup = oContext.getProperty("ConfirmationGroup");
                 var sConfCount = oContext.getProperty("ConfirmationCount");
 
+                // Safely parse to integers to check if they are actually greater than 0
+                var iConfGroup = parseInt(sConfGroup, 10);
+                var iConfCount = parseInt(sConfCount, 10);
+
                 // 2. Evaluate if the creation was truly successful
-                if (sConfGroup && sStatus !== "E") {
+                // Must exist, not be empty, and mathematically > 0
+                if (iConfGroup > 0 && iConfCount > 0 && sStatus !== "E") {
                     
                     var sSuccessMsg = "Data posted successfully!\n\n" + 
                                       "Confirmation Group: " + sConfGroup + "\n" +
@@ -369,7 +389,7 @@ sap.ui.define([
                             oLocalModel.setProperty("/selection/salesOrder", "");
                             oLocalModel.setProperty("/selection/salesOrderItem", "");
                             oLocalModel.setProperty("/selection/remark", "");
-                            oLocalModel.setProperty("/selection/shift", "1");
+                            oLocalModel.setProperty("/selection/shift", "A");
                             oLocalModel.setProperty("/selection/yieldQty", "");
                             oLocalModel.setProperty("/selection/unit", "");
                             // Put cursor back at the production order input
@@ -380,8 +400,8 @@ sap.ui.define([
                         }
                     });
                 } else {
-                    // Backend accepted the call but business logic failed (e.g., missing group)
-                    var sErrorText = sMessage ? sMessage : "Submission failed: Confirmation Group was not generated.";
+                    // Backend accepted the call but business logic failed (e.g., missing group or count was 0)
+                    var sErrorText = sMessage ? sMessage : "Submission failed: Confirmation Group or Count was not generated.";
                     sap.m.MessageBox.error(sErrorText);
                 }
 
@@ -417,7 +437,7 @@ sap.ui.define([
             // Retain defaults for standard fields to save user time (optional)
             oLocalModel.setProperty("/selection/plant", "");
             oLocalModel.setProperty("/selection/Sloc", "1210");
-            oLocalModel.setProperty("/selection/shift", "1");
+            oLocalModel.setProperty("/selection/shift", "A");
 
             // 3. Recalculate Yield (this will safely reset it to "0.00" since the array is now empty)
             if (this._calculateTotalYield) {

@@ -31,7 +31,7 @@ function (JSONModel, Device) {
                     salesOrder: "",
                     salesOrderItem: "",
                     Sloc: "1210", 
-                    shift : "1",
+                    shift : "A",
                     prodOrdQty: "",
                     operation : "0010",
                     unit : "",

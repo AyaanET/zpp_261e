@@ -84,8 +84,8 @@
 
                             <Label id="_IDGenLabelShift" text="Shift" required="true"/>
                             <Select id="selectShift" selectedKey="{local>/selection/shift}">
-                                <core:Item id="shiftItem1" key="1" text="1" />
-                                <core:Item id="shiftItem2" key="2" text="2" />
+                                <core:Item id="shiftItem1" key="A" text="A" />
+                                <core:Item id="shiftItem2" key="B" text="B" />
                             </Select>
 
                             <Label id="_IDGenLabel5" text="Remark" />
