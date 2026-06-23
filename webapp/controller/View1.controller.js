@@ -296,9 +296,9 @@ sap.ui.define([
             var fYieldQty = parseFloat(oSelection.yieldQty) || 0;
 
             // Compare rounded to 3 decimal places to avoid JS floating-point precision issues
-            if (fYieldQty.toFixed(3) > fProdOrdQty.toFixed(3)) {
+          if (Number(fYieldQty.toFixed(3)) > Number(fProdOrdQty.toFixed(3))) {
                 sap.m.MessageBox.error(
-                    `Yield Quantity cannot exceed the Production Order Quantity (${fProdOrdQty}).`
+                    "Yield Quantity cannot exceed the Production Order Quantity (" + fProdOrdQty + ")."
                 );
                 return;
             }
