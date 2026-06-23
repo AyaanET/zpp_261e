@@ -292,8 +292,8 @@ sap.ui.define([
             }
 
             // Parse quantities to floats and handle potential empty values
-            var fProdOrdQty = String(oSelection.prodOrdQty) || 0;
-            var fYieldQty = String(oSelection.yieldQty) || 0;
+            var fProdOrdQty = parseFloat(oSelection.prodOrdQty) || 0;
+            var fYieldQty = parseFloat(oSelection.yieldQty) || 0;
 
             // Compare rounded to 3 decimal places to avoid JS floating-point precision issues
             if (fYieldQty.toFixed(3) > fProdOrdQty.toFixed(3)) {
