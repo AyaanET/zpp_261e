@@ -24,9 +24,24 @@
                                 formatOptions: {pattern: 'MMM dd, yyyy'}
                             }" />
 
-                            <Label id="_IDGenLabelProdOrder" text="Production Order" required="true"  />
-                            <Input id="inputProdOrder" value="{local>/selection/prodOrder}" placeholder="Enter Production Order" change=".onProdOrderChange" />
+                            <!-- <Label id="_IDGenLabelProdOrder" text="Production Order" required="true"  />
+                            <Input id="inputProdOrder" value="{local>/selection/prodOrder}" placeholder="Enter Production Order" change=".onProdOrderChange" /> -->
 
+                            <Label id="_IDGenLabelProdOrder" text="Production Order" required="true"  />
+                            <Input id="inputProdOrder" 
+                                   value="{local>/selection/prodOrder}" 
+                                   placeholder="Enter Production Order" 
+                                   change=".onProdOrderChange"
+                                   showValueHelp="true"
+                                   showSuggestion="true"
+                                   suggest=".onProdOrderSuggest"
+                                   suggestionItems="{ path: '/ZI_PRODORD_VH', templateShareable: false }"
+                                   valueHelpRequest=".onProdOrderValueHelp">
+                                <suggestionItems>
+                                    <core:ListItem id="_IDGenListItemProdOrd" text="{ManufacturingOrder}" key="{ManufacturingOrder}" />
+                                </suggestionItems>
+                            </Input>
+                            
                             <Label id="_IDGenLabelOperation" text="Operation" required="true" />
                             <Input id="inputOperation" value="{local>/selection/operation}" placeholder="Enter Operation" />
 

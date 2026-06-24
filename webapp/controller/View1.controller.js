@@ -181,6 +181,65 @@ sap.ui.define([
                 this.onSlocChange(); 
             }
         },
+
+        // ==========================================
+        // PRODUCTION ORDER VALUE HELP LOGIC
+        // ==========================================
+        
+        onProdOrderSuggest: function (oEvent) {
+            var sTerm = oEvent.getParameter("suggestValue");
+            var aFilters = [];
+
+            if (sTerm) {
+                // Allows searching while typing
+                aFilters.push(new Filter("ManufacturingOrder", FilterOperator.StartsWith, sTerm));
+            }
+            oEvent.getSource().getBinding("suggestionItems").filter(aFilters);
+        },
+
+        onProdOrderValueHelp: function (oEvent) {
+            var oView = this.getView();
+
+            if (!this._oProdOrdDialog) {
+                sap.ui.core.Fragment.load({
+                    id: oView.getId(),
+                    name: "zpp261e.view.ProdOrdVH", // Ensure this matches your namespace and folder structure
+                    controller: this
+                }).then(function (oDialog) {
+                    this._oProdOrdDialog = oDialog;
+                    oView.addDependent(this._oProdOrdDialog);
+                    
+                    // Open the dialog first so OData V4 initializes the list binding
+                    this._oProdOrdDialog.open();
+                }.bind(this));
+            } else {
+                this._oProdOrdDialog.open();
+            }
+        },
+
+        onProdOrdVHSearch: function (oEvent) {
+            var sValue = oEvent.getParameter("value");
+            var aFilters = [];
+
+            if (sValue) {
+                // Filter by the Manufacturing Order if the user types in the search bar of the F4 popup
+                aFilters.push(new Filter("ManufacturingOrder", FilterOperator.Contains, sValue));
+            }
+            oEvent.getSource().getBinding("items").filter(aFilters);
+        },
+
+        onProdOrdVHConfirm: function (oEvent) {
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+            if (oSelectedItem) {
+                var sProdOrder = oSelectedItem.getCells()[0].getText();
+                
+                // Update the local JSON model
+                this.getView().getModel("local").setProperty("/selection/prodOrder", sProdOrder);
+                
+                // Trigger the existing function to fetch the header details automatically!
+                this.onProdOrderChange(); 
+            }
+        },
          
        // ==========================================
         // BACKGROUND CACHE LOGIC
