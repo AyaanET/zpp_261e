@@ -6,117 +6,131 @@
     <Page id="page" title="{i18n>title}">
         <content>
             
-            <Panel id="selectionPanel" expandable="true" expanded="true" headerText="Selection Screen" width="auto" class="sapUiResponsiveMargin">
-                <content>
-                    
-                    <f:SimpleForm id="selectionForm"
-                        editable="true"
-                        layout="ColumnLayout"
-                        columnsM="3" columnsL="3" columnsXL="3">
-                        <f:content>
-                            
-                            <core:Title id="_IDGenTitleCol1" text="Production Details" />
+ <Panel id="selectionPanel" expandable="true" expanded="true" headerText="Selection Screen" width="auto" class="sapUiResponsiveMargin">
+            <content>
+                
+                <f:SimpleForm id="selectionForm"
+                    editable="true"
+                    layout="ResponsiveGridLayout"
+                    labelSpanXL="12" labelSpanL="12" labelSpanM="12" labelSpanS="12"
+                    adjustLabelSpan="false"
+                    emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0"
+                    columnsXL="4" columnsL="4" columnsM="2"
+                    singleContainerFullSize="false">
+                    <f:content>
+                        
+                        <core:Title id="_IDGenTitleCol1" text="Production Details" />
 
-                            <Label id="_IDGenLabelPostingDate" text="Posting Date" required="true" />
-                            <DatePicker id="_IDGenDatePicker" value="{
-                                path: 'local>/selection/postingDate', 
-                                type: 'sap.ui.model.type.Date', 
-                                formatOptions: {pattern: 'MMM dd, yyyy'}
-                            }" />
+                        <Label id="_IDGenLabelPostingDate" text="Posting Date" required="true" />
+                        <DatePicker id="_IDGenDatePicker" value="{
+                            path: 'local>/selection/postingDate', 
+                            type: 'sap.ui.model.type.Date', 
+                            formatOptions: {pattern: 'MMM dd, yyyy'}
+                        }" />
 
-                            <!-- <Label id="_IDGenLabelProdOrder" text="Production Order" required="true"  />
-                            <Input id="inputProdOrder" value="{local>/selection/prodOrder}" placeholder="Enter Production Order" change=".onProdOrderChange" /> -->
+                        <Label id="_IDGenLabelProdOrder" text="Production Order" required="true"  />
+                        <Input id="inputProdOrder" 
+                               value="{local>/selection/prodOrder}" 
+                               placeholder="Enter Production Order" 
+                               change=".onProdOrderChange"
+                               showValueHelp="true"
+                               showSuggestion="true"
+                               suggest=".onProdOrderSuggest"
+                               suggestionItems="{ path: '/ZI_PRODORD_VH', templateShareable: false }"
+                               valueHelpRequest=".onProdOrderValueHelp">
+                            <suggestionItems>
+                                <core:ListItem id="_IDGenListItemProdOrd" text="{ManufacturingOrder}" key="{ManufacturingOrder}" />
+                            </suggestionItems>
+                        </Input>
+                        
+                        <Label id="_IDGenLabelOperation" text="Operation" required="true" />
+                        <Input id="inputOperation" value="{local>/selection/operation}" placeholder="Enter Operation" />
 
-                            <Label id="_IDGenLabelProdOrder" text="Production Order" required="true"  />
-                            <Input id="inputProdOrder" 
-                                   value="{local>/selection/prodOrder}" 
-                                   placeholder="Enter Production Order" 
-                                   change=".onProdOrderChange"
-                                   showValueHelp="true"
-                                   showSuggestion="true"
-                                   suggest=".onProdOrderSuggest"
-                                   suggestionItems="{ path: '/ZI_PRODORD_VH', templateShareable: false }"
-                                   valueHelpRequest=".onProdOrderValueHelp">
-                                <suggestionItems>
-                                    <core:ListItem id="_IDGenListItemProdOrd" text="{ManufacturingOrder}" key="{ManufacturingOrder}" />
-                                </suggestionItems>
-                            </Input>
-                            
-                            <Label id="_IDGenLabelOperation" text="Operation" required="true" />
-                            <Input id="inputOperation" value="{local>/selection/operation}" placeholder="Enter Operation" />
+                        <Label id="_IDGenLabelProdQty" text="Production Order Qty" />
+                        <Input id="inputProdOrderQty" value="{local>/selection/prodOrdQty}" editable="false" placeholder="Enter Quantity" />
+                        
 
-                            <Label id="_IDGenLabelProdQty" text="Production Order Qty" />
-                            <Input id="inputProdOrderQty" value="{local>/selection/prodOrdQty}" placeholder="Enter Quantity" />
-                            
+                        <core:Title id="_IDGenTitleCol2" text="Sales &amp; Plant Details" />
 
-                            <core:Title id="_IDGenTitleCol2" text="Sales &amp; Storage Details" />
+                        <Label id="_IDGenLabel1" text="Sales Order" required="true"/>
+                        <Input id="inputSalesOrder"
+                               editable="false"
+                               value="{local>/selection/salesOrder}" 
+                               placeholder="Select Sales Order">
+                        </Input>
 
-                            <Label id="_IDGenLabel1" text="Sales Order" required="true"/>
-                            <Input id="inputSalesOrder"
-                                   value="{local>/selection/salesOrder}" 
-                                   placeholder="Select Sales Order">
-                                <!-- <suggestionItems>
-                                    <core:ListItem id="_IDGenListItem2" text="{SalesOrder}" key="{SalesOrder}" />
-                                </suggestionItems> -->
-                            </Input>
+                        <Label id="_IDGenLabel2" text="Sales Order Item" required="true"/>
+                        <Input id="inputSalesOrderItem"
+                               editable="false"
+                               value="{local>/selection/salesOrderItem}" 
+                               placeholder="Select Item">
+                        </Input>
 
-                            <Label id="_IDGenLabel2" text="Sales Order Item" required="true"/>
-                            <Input id="inputSalesOrderItem"
-                                   value="{local>/selection/salesOrderItem}" 
-                                   placeholder="Select Item">
-                                <!-- <suggestionItems>
-                                    <core:ListItem id="_IDGenListItem3" text="{SalesOrderItem}" key="{SalesOrderItem}" />
-                                </suggestionItems> -->
-                            </Input>
+                         <Label id="_IDGenLabel" text="Plant" required="true"/>
+                        <Input id="inputPlant"
+                               value="{local>/selection/plant}"     
+                               change=".onSelectionChange"
+                               editable="false"
+                               placeholder="Select Plant">
+                        </Input>
 
-                            <Label id="_IDGenLabel" text="Plant" required="true"/>
-                            <Input id="inputPlant"
-                                   value="{local>/selection/plant}"     
-                                   change=".onSelectionChange"
-                                   placeholder="Select Plant">
-                                <!-- <suggestionItems>
-                                    <core:ListItem id="_IDGenListItem1" text="{Plant}" additionalText="{PlantName}" key="{Plant}" />
-                                </suggestionItems> -->
-                            </Input>
+                        <Label id="_IDGenLabel4" text="UOM"/>
+                        <Input id="inputUOM" 
+                               editable="false"
+                               value="{local>/selection/unit}" 
+                               placeholder="Enter UOM..." />
 
-                            <!-- <Label id="_IDGenLabel3" text="Storage Location" required="true"/>
-                            <Input id="inputFromSloc" value="{local>/selection/Sloc}" change=".onSlocChange" placeholder="Select Storage Location" /> -->
 
-                             <Label id="_IDGenLabel3" text="From Storage Location" required="true"/>
-                            <Input id="inputFromSloc" 
-                                value="{local>/selection/Sloc}"
-                                change=".onSlocChange"
-                                showValueHelp="true"
-                                showSuggestion="true"
-                                suggest=".onFromSlocSuggest"
-                                suggestionItems="{ path: '/ZI_STORAGELOCATION_VH', templateShareable: false }"
-                                valueHelpRequest=".onFromSlocValueHelp"
-                                placeholder="Select From Sloc">
-                                <suggestionItems>
-                                    <core:ListItem id="_IDGenListItemFromSloc" text="{StorageLocation}" additionalText="{StorageLocationName}" key="{StorageLocation}" />
-                                </suggestionItems>
-                            </Input>
-                            <core:Title id="_IDGenTitleCol3" text="Additional Info" />
+                        <core:Title id="_IDGenTitleCol3" text="Material Details" />
 
-                            <Label id="_IDGenLabelShift" text="Shift" required="true"/>
-                            <Select id="selectShift" selectedKey="{local>/selection/shift}">
-                                <core:Item id="shiftItem1" key="A" text="A" />
-                                <core:Item id="shiftItem2" key="B" text="B" />
-                            </Select>
+                        <Label id="_IDGenLabel7"  text="Material" />
+                        <Input id="_IDGenInput1"  value="{local>/selection/material}" placeholder="Enter Material" editable="false" />
 
-                            <Label id="_IDGenLabel5" text="Remark" />
-                            <Input id="inputRemark" 
-                                   value="{local>/selection/remark}" placeholder="Enter remark..." />
+                        <Label id="_IDGenLabel8"  text="Material Description" />
+                        <Input id="_IDGenInput2"  value="{local>/selection/materialDescription}" placeholder="Enter Material Description" editable="false" />
 
-                            <Label id="_IDGenLabel4" text="UOM"/>
-                            <Input id="inputUOM" 
-                                   value="{local>/selection/unit}" placeholder="Enter UOM..." />
-                            
-                        </f:content>
-                    </f:SimpleForm>
-                    
-                </content>
-            </Panel>
+                        <Label id="_IDGenLabel9"  text="SFG Material" />
+                        <Input id="_IDGenInput3"  value="{local>/selection/sfgmat}" placeholder="Enter SFG Material" editable="false" />
+
+                        <Label id="_IDGenLabel10"  text="SFG Description" />
+                        <Input id="_IDGenInput4"  value="{local>/selection/sfgdes}" placeholder="Enter SFG Description" editable="false" />
+
+                       
+
+
+                        <core:Title id="_IDGenTitleCol4" text="Storage &amp; Additional" />
+
+                        <Label id="_IDGenLabel3" text="From Storage Location" required="true"/>
+                        <Input id="inputFromSloc" 
+                            value="{local>/selection/Sloc}"
+                            change=".onSlocChange"
+                            showValueHelp="true"
+                            showSuggestion="true"
+                            editable="false"
+                            suggest=".onFromSlocSuggest"
+                            suggestionItems="{ path: '/ZI_STORAGELOCATION_VH', templateShareable: false }"
+                            valueHelpRequest=".onFromSlocValueHelp"
+                            placeholder="Select From Sloc">
+                            <suggestionItems>
+                                <core:ListItem id="_IDGenListItemFromSloc" text="{StorageLocation}" additionalText="{StorageLocationName}" key="{StorageLocation}" />
+                            </suggestionItems>
+                        </Input>
+
+                        <Label id="_IDGenLabelShift" text="Shift" required="true"/>
+                        <Select id="selectShift" selectedKey="{local>/selection/shift}">
+                            <core:Item id="shiftItem1" key="A" text="A" />
+                            <core:Item id="shiftItem2" key="B" text="B" />
+                        </Select>
+
+                        <Label id="_IDGenLabel5" text="Remark" />
+                        <Input id="inputRemark" 
+                               value="{local>/selection/remark}" placeholder="Enter remark..." />
+                        
+                    </f:content>
+                </f:SimpleForm>
+                
+            </content>
+        </Panel>
 
             <Panel id="_IDGenPanel"
                 headerText="Scan Batches"
@@ -170,6 +184,11 @@
                         <OverflowToolbar id="_IDGenOverflowToolbar">
                             <Title id="_IDGenTitle" text="Scanned Items" level="H3" />
                             <ToolbarSpacer id="_IDGenToolbarSpacer" />
+                            <Button id="btnExport"
+                                text="Export"
+                                icon="sap-icon://excel-attachment"
+                                type="Success"
+                                press=".onExportExcel" />
                             <Button id="_IDGenButton1"
                                 text="Delete"
                                 icon="sap-icon://delete"

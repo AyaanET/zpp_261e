@@ -36,7 +36,12 @@ function (JSONModel, Device) {
                     operation : "0010",
                     unit : "",
                     remark: "",
-                    yieldQty: ""
+                    yieldQty: "",
+                    material: "",        // NEW: Added for Material
+                    materialDescription: "",
+                    sfgmat: "",
+                    sfgdes: "" // NEW: Added for Material Description
+
                 },
 
                 // 2. Background Data (Loaded from ZI_GET_BATCHES)

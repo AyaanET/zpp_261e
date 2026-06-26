@@ -4,8 +4,10 @@ sap.ui.define([
     "sap/ui/model/Filter",           // <-- Add this
     "sap/ui/model/FilterOperator",   // <-- Add this
     "sap/m/MessageToast",            // <-- Add this
-    "sap/m/MessageBox"               // <-- Add this
-], function (Controller, models, Filter, FilterOperator, MessageToast, MessageBox) { 
+    "sap/m/MessageBox",              // <-- Add this
+    "sap/ui/export/Spreadsheet",     // <-- Add this
+    "sap/ui/export/library"           // <-- Add this
+], function (Controller, models, Filter, FilterOperator, MessageToast, MessageBox, Spreadsheet, exportLibrary) { 
     // ^ Changed to standard 'function' and added corresponding parameters
     "use strict";
 
@@ -45,7 +47,7 @@ sap.ui.define([
             ];
 
             var oListBinding = oModel.bindList("/ZI_GET_HEADER", null, null, aFilters, {
-                $select: "ManufacturingOrder,SalesOrder,SalesOrderItem,MfgOrderPlannedTotalQty,ProductionUnit,ProductionPlant"
+                $select: "ManufacturingOrder,SalesOrder,SalesOrderItem,MfgOrderPlannedTotalQty,Material,ProductDescription,SFGMAT,SFGDes,BaseUnit,ProductionPlant"
             });
 
             oView.setBusy(true);
@@ -63,11 +65,15 @@ sap.ui.define([
                 oLocalModel.setProperty("/selection/salesOrderItem", oHeader.SalesOrderItem);
                 oLocalModel.setProperty("/selection/prodOrdQty", oHeader.MfgOrderPlannedTotalQty);
                 oLocalModel.setProperty("/selection/plant", oHeader.ProductionPlant);
-                oLocalModel.setProperty("/selection/unit", oHeader.ProductionUnit);
+                oLocalModel.setProperty("/selection/unit", oHeader.BaseUnit);
+                oLocalModel.setProperty("/selection/material", oHeader.Material);
+                oLocalModel.setProperty("/selection/materialDescription", oHeader.ProductDescription);
+                oLocalModel.setProperty("/selection/sfgmat", oHeader.SFGMAT);
+                oLocalModel.setProperty("/selection/sfgdes", oHeader.SFGDes);
 
                 // Make sure fetchBatchesInBackground is defined elsewhere in your controller!
                 if(this._fetchBatchesInBackground) {
-                    this._fetchBatchesInBackground(oHeader.SalesOrder, oHeader.SalesOrderItem);
+                    this._fetchBatchesInBackground(oHeader.SalesOrder, oHeader.SalesOrderItem, oHeader.SFGMAT);
                 }
                 
             }.bind(this)).catch(function (oError) {
@@ -81,10 +87,11 @@ sap.ui.define([
             var oLocalModel = this.getView().getModel("local");
             var sSalesOrder = oLocalModel.getProperty("/selection/salesOrder");
             var sSalesOrderItem = oLocalModel.getProperty("/selection/salesOrderItem");
+            var sSFGMAT = oLocalModel.getProperty("/selection/sfgmat");
 
             // Only try to re-fetch if the Sales Order details are already known
             if (sSalesOrder && sSalesOrderItem) {
-                this._fetchBatchesInBackground(sSalesOrder, sSalesOrderItem);
+                this._fetchBatchesInBackground(sSalesOrder, sSalesOrderItem, sSFGMAT);
             }
         },
 
@@ -244,7 +251,7 @@ sap.ui.define([
        // ==========================================
         // BACKGROUND CACHE LOGIC
         // ==========================================
-        _fetchBatchesInBackground: function (sSalesOrder, sSalesOrderItem) {
+        _fetchBatchesInBackground: function (sSalesOrder, sSalesOrderItem, sSFGMAT) {
             var oView = this.getView();
 
             var oLocalModel = oView.getModel("local"); 
@@ -268,7 +275,8 @@ sap.ui.define([
             var aFilters = [
                 new Filter("SDDocument", FilterOperator.EQ, sSalesOrder),
                 new Filter("SDDocumentItem", FilterOperator.EQ, sSalesOrderItem),
-                new Filter("StorageLocation", FilterOperator.EQ, sSloc) // Filter by Storage Location as well
+                new Filter("StorageLocation", FilterOperator.EQ, sSloc), // Filter by Storage Location as well
+                new Filter("Material", FilterOperator.EQ, sSFGMAT) // Filter by SFG Material
             ];
 
             // FIX: Update the $select string to match CDS View and remove extra spaces
@@ -299,11 +307,11 @@ sap.ui.define([
         // ==========================================
         // SCAN VALIDATION & APPEND LOGIC
         // ==========================================
-        onAddBatch: function (oEvent) {
+          onAddBatch: function (oEvent) {
             var oView = this.getView();
             var oInput = oView.byId("batchInput");
             
-            var sScannedBatch = oInput.getValue().trim(); 
+            var sInputValue = oInput.getValue().trim(); 
             var oLocalModel = oView.getModel("local");
 
             // Helper function to keep focus on the scanner input
@@ -313,48 +321,92 @@ sap.ui.define([
                 }, 100);
             };
 
-            if (!sScannedBatch) {
+            if (!sInputValue) {
                 sap.m.MessageToast.show("Please enter or scan a batch.");
+                retainFocus();
                 return;
             }
 
             var aAllBatches = oLocalModel.getProperty("/allBatches") || [];
             var aScanned = oLocalModel.getProperty("/scannedBatches") || [];
 
-            var oFoundBatch = aAllBatches.find(function(b) {
-                return b.Batch === sScannedBatch;
+            // 1. Split the input string by any whitespace (handles spaces, tabs, and newlines!)
+            var aInputBatches = sInputValue.split(/\s+/);
+            
+            // 2. Track what happens during the loop
+            var iAddedCount = 0;
+            var aNotFound = [];
+            var aDuplicates = [];
+
+            // 3. Loop through every batch the user provided
+            aInputBatches.forEach(function(sScannedBatch) {
+                if (!sScannedBatch) { return; } // Skip empty strings caused by extra spaces
+
+                // Find the batch in the background cache
+                var oFoundBatch = aAllBatches.find(function(b) {
+                    return b.Batch === sScannedBatch;
+                });
+
+                if (!oFoundBatch) {
+                    aNotFound.push(sScannedBatch);
+                    return; // Skip to the next batch
+                }
+
+                // Check if it's already in the table
+                var bAlreadyScanned = aScanned.some(function(b) {
+                    return b.batch === sScannedBatch;
+                });
+
+                if (bAlreadyScanned) {
+                    aDuplicates.push(sScannedBatch);
+                    return; // Skip to the next batch
+                }
+
+                // If found and not a duplicate, add it to our array
+                aScanned.push({
+                    batch:       oFoundBatch.Batch,
+                    material:    oFoundBatch.Material,
+                    description: oFoundBatch.ProductDescription,
+                    qty:         oFoundBatch.QTY,
+                    uom:         oFoundBatch.MaterialBaseUnit
+                });
+                
+                iAddedCount++;
             });
 
-            if (!oFoundBatch) {
-                sap.m.MessageBox.error("Batch " + sScannedBatch + " not found or has 0 quantity in this Plant/SLoc.");
-                oInput.setValue(""); 
-                return;
+            // 4. If we successfully added at least one batch, update the UI
+            if (iAddedCount > 0) {
+                oLocalModel.setProperty("/scannedBatches", aScanned);
+                
+                // Recalculate the yield quantity
+                if (this._calculateTotalYield) {
+                    this._calculateTotalYield();
+                }
             }
 
-            var bAlreadyScanned = aScanned.some(function(b) {
-                return b.batch === sScannedBatch;
-            });
-
-            if (bAlreadyScanned) {
-                sap.m.MessageToast.show("Batch " + sScannedBatch + " is already added.");
-                oInput.setValue("");
-                return;
+            // 5. Build a dynamic feedback message for the user
+            var sMessage = "";
+            if (iAddedCount > 0) {
+                sMessage += "Added " + iAddedCount + " batches. ";
+            }
+            if (aNotFound.length > 0) {
+                sMessage += "\nBatches Not Found or have 0 Quantity: " + aNotFound.join(", ") + ".";
+            }
+            if (aDuplicates.length > 0) {
+                sMessage += "\nBatches Already Added: " + aDuplicates.join(", ") + ".";
             }
 
-            aScanned.push({
-                batch:       oFoundBatch.Batch,
-                material:    oFoundBatch.Material,
-                description: oFoundBatch.ProductDescription,
-                qty:         oFoundBatch.QTY,
-                uom:         oFoundBatch.MaterialBaseUnit
-            });
+            // 6. Show the result
+            if (aNotFound.length > 0 || aDuplicates.length > 0) {
+                // If there were any errors, use a Warning popup so they don't miss it
+                sap.m.MessageBox.warning(sMessage.trim());
+            } else {
+                // If everything was perfect, just show a quick toast
+                sap.m.MessageToast.show(sMessage.trim());
+            }
 
-            oLocalModel.setProperty("/scannedBatches", aScanned);
+            // 7. Clear the input and lock the cursor back in place
             oInput.setValue("");
-
-            this._calculateTotalYield();
-
-            // 3. Keep the cursor locked in the box so the user can scan the next item instantly!
             retainFocus();
         },
 
@@ -449,9 +501,9 @@ sap.ui.define([
             var fYieldQty = parseFloat(oSelection.yieldQty) || 0;
 
             // Compare rounded to 3 decimal places to avoid JS floating-point precision issues
-          if (Number(fYieldQty.toFixed(3)) > Number(fProdOrdQty.toFixed(3))) {
+          if (Number(fYieldQty.toFixed(3)) !== Number(fProdOrdQty.toFixed(3))) {
                 sap.m.MessageBox.error(
-                    "Yield Quantity cannot exceed the Production Order Quantity (" + fProdOrdQty + ")."
+                    "Yield Quantity cannot be different from Production Order Quantity.\n\n"
                 );
                 return;
             }
@@ -608,7 +660,75 @@ sap.ui.define([
                     oProdOrderInput.focus();
                 }, 100);
             }
-        }
+        },
+
+        // ==========================================
+        // EXPORT TO EXCEL LOGIC
+        // ==========================================
+        onExportExcel: function () {
+            var oView = this.getView();
+            var oLocalModel = oView.getModel("local");
+            var aScannedBatches = oLocalModel.getProperty("/scannedBatches");
+
+            // 1. Check if there is actually data to export
+            if (!aScannedBatches || aScannedBatches.length === 0) {
+                sap.m.MessageToast.show("There are no scanned batches to export.");
+                return;
+            }
+
+            // 2. Fetch the column configuration
+            var aCols = this._createColumnConfig();
+
+            // 3. Configure the Excel document settings
+            var oSettings = {
+                workbook: {
+                    columns: aCols,
+                    hierarchyLevel: 'Level'
+                },
+                dataSource: aScannedBatches,      // Feed it our local JSON array
+                fileName: 'Scanned_Batches.xlsx', // Name of the downloaded file
+                worker: false                     // Set to false for local JSON data
+            };
+
+            // 4. Build and download the spreadsheet
+            var oSheet = new Spreadsheet(oSettings);
+            oSheet.build().finally(function() {
+                oSheet.destroy();
+            });
+        },
+
+        // Helper function to define Excel columns
+        _createColumnConfig: function () {
+            var EdmType = exportLibrary.EdmType;
+
+            return [
+                {
+                    label: 'Batch Number',
+                    property: 'batch',
+                    type: EdmType.String
+                },
+                {
+                    label: 'Material',
+                    property: 'material',
+                    type: EdmType.String
+                },
+                {
+                    label: 'Description',
+                    property: 'description',
+                    type: EdmType.String
+                },
+                {
+                    label: 'Quantity',
+                    property: 'qty',
+                    type: EdmType.Number
+                },
+                {
+                    label: 'Unit of Measure',
+                    property: 'uom',
+                    type: EdmType.String
+                }
+            ];
+        },
     });
 });
 
